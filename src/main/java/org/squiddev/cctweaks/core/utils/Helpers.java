@@ -3,12 +3,19 @@ package org.squiddev.cctweaks.core.utils;
 import cpw.mods.fml.common.registry.GameRegistry;
 import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.shared.computer.blocks.TileComputerBase;
+import dan200.computercraft.shared.computer.core.ComputerFamily;
+import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.util.IDAssigner;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.io.File;
+
+import javax.annotation.Nullable;
 
 /**
  * Helper methods for various things
@@ -108,4 +115,26 @@ public class Helpers {
 	}
 
 	public static int THREAD_PRIORITY = Thread.MIN_PRIORITY + (Thread.NORM_PRIORITY - Thread.MIN_PRIORITY) / 2;
+
+	@Nullable
+	public static TileComputerBase getTile(ServerComputer computer) {
+		World world = computer.getWorld();
+		ChunkCoordinates pos = computer.getPosition();
+
+		if (world != null && pos != null && world.blockExists(pos.posX, pos.posY, pos.posZ)) {
+			TileEntity te = world.getTileEntity(pos.posX, pos.posY, pos.posZ);
+			if (te instanceof TileComputerBase && ((TileComputerBase) te).getServerComputer() == computer) {
+				return ((TileComputerBase) te);
+			}
+		}
+
+		return null;
+	}
+
+	public static ComputerFamily guessFamily(ServerComputer computer) {
+		TileComputerBase tile = getTile(computer);
+		if (tile != null) return tile.getFamily();
+
+		return computer.isColour() ? ComputerFamily.Advanced : ComputerFamily.Normal;
+	}
 }

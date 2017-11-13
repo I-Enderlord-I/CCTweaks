@@ -29,6 +29,9 @@ public class CCTweaks {
 
 	public static final String ROOT_NAME = "org.squiddev.cctweaks.";
 	public static final String GUI_FACTORY = ROOT_NAME + "client.gui.GuiConfigFactory";
+	
+	@Mod.Instance(ID)
+	public static CCTweaks instance;
 
 	public static SimpleNetworkWrapper NETWORK;
 
@@ -49,6 +52,7 @@ public class CCTweaks {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		Registry.init();
+		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 	}
 
 	@EventHandler
