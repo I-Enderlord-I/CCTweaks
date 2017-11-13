@@ -4,6 +4,7 @@ import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
 import org.squiddev.cctweaks.api.network.INetworkHelpers;
 import org.squiddev.cctweaks.api.network.INetworkRegistry;
 import org.squiddev.cctweaks.api.peripheral.IPeripheralHelpers;
+import org.squiddev.cctweaks.api.pocket.IPocketRegistry;
 import org.squiddev.cctweaks.api.turtle.ITurtleFuelRegistry;
 import org.squiddev.cctweaks.api.turtle.ITurtleRegistry;
 
@@ -22,4 +23,6 @@ public interface ICCTweaksAPI {
 	IPeripheralHelpers peripheralHelpers();
 
 	ILuaEnvironment luaEnvironment();
+	
+	IPocketRegistry pocketRegistry(); 
 }

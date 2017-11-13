@@ -121,6 +121,6 @@ public class CraftingComputerUpgrade implements IRecipe {
 
 	@Override
 	public ItemStack getRecipeOutput() {
-		return null;
+		return ComputerItemFactory.create(-1, null, ComputerFamily.Advanced);
 	}
 }

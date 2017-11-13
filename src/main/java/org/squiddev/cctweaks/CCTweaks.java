@@ -10,6 +10,8 @@ import cpw.mods.fml.relauncher.Side;
 import dan200.computercraft.ComputerCraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.common.MinecraftForge;
+
+import org.squiddev.cctweaks.command.CommandCCTweaks;
 import org.squiddev.cctweaks.core.FmlEvents;
 import org.squiddev.cctweaks.core.McEvents;
 import org.squiddev.cctweaks.core.network.bridge.NetworkBindings;
@@ -52,6 +54,11 @@ public class CCTweaks {
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		Registry.postInit();
+	}
+
+	@EventHandler
+	public void onServerStarting(FMLServerStartingEvent event) {
+		event.registerServerCommand(CommandCCTweaks.create(event.getServer()));
 	}
 
 	@EventHandler
