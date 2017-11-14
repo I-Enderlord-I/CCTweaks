@@ -6,6 +6,7 @@ import dan200.computercraft.shared.computer.core.ComputerFamily;
 import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.pocket.items.ItemPocketComputer;
 import dan200.computercraft.shared.pocket.peripherals.PocketModemPeripheral;
+import dan200.computercraft.shared.util.Colour;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,14 +17,19 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.squiddev.cctweaks.api.IComputerItemFactory;
+import org.squiddev.cctweaks.api.computer.ICustomRomItem;
+import org.squiddev.cctweaks.api.computer.IExtendedServerComputer;
+import org.squiddev.cctweaks.core.pocket.PocketAPIExtensions;
 import org.squiddev.cctweaks.core.pocket.PocketHooks;
 import org.squiddev.cctweaks.core.pocket.PocketRegistry;
+import org.squiddev.cctweaks.core.utils.DebugLogger;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
 import com.google.common.base.Objects;
@@ -33,7 +39,7 @@ import com.google.common.base.Objects;
  *
  * @see org.squiddev.cctweaks.core.pocket.PocketHooks
  */
-public class ItemPocketComputer_Patch extends ItemPocketComputer implements IComputerItemFactory {
+public class ItemPocketComputer_Patch extends ItemPocketComputer implements IComputerItemFactory, ICustomRomItem {
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		if (!world.isRemote) {
@@ -104,6 +110,66 @@ public class ItemPocketComputer_Patch extends ItemPocketComputer implements ICom
 			createClientComputer(stack);
 		}
 	}
+
+	private ServerComputer createServerComputer(World world, IInventory inventory, ItemStack stack) {
+		if (world.isRemote) {
+			return null;
+		}
+		int instanceID = getInstanceID(stack);
+		int sessionID = getSessionID(stack);
+		int correctSessionID = ComputerCraft.serverComputerRegistry.getSessionID();
+		ServerComputer computer;
+		if (instanceID >= 0 && sessionID == correctSessionID && ComputerCraft.serverComputerRegistry.contains(instanceID)) {
+			computer = ComputerCraft.serverComputerRegistry.get(instanceID);
+		} else {
+			if (instanceID < 0 || sessionID != correctSessionID) {
+				instanceID = ComputerCraft.serverComputerRegistry.getUnusedInstanceID();
+				setInstanceID(stack, instanceID);
+				setSessionID(stack, correctSessionID);
+			}
+
+			int computerID = getComputerID(stack);
+			if (computerID < 0) {
+				computerID = ComputerCraft.createUniqueNumberedSaveDir(world, "computer");
+				setComputerID(stack, computerID);
+			}
+
+			computer = new ServerComputer(world, computerID, getLabel(stack), instanceID, getFamily(stack), 26, 20);
+			if (hasCustomRom(stack)) {
+				DebugLogger.debug("Setting custom ROM from " + stack);
+				((IExtendedServerComputer) computer).setCustomRom(getCustomRom(stack));
+			}
+
+			computer.addAPI(new PocketAPIExtensions(computer));
+			PocketHooks.create(inventory, stack, computer);
+
+			if (getHasModem(stack)) computer.setPeripheral(2, new PocketModemPeripheral());
+			ComputerCraft.serverComputerRegistry.add(instanceID, computer);
+
+			if (inventory != null) inventory.markDirty();
+		}
+
+		computer.setWorld(world);
+		return computer;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced) {
+		if (advanced) {
+			int id = getComputerID(stack);
+			if (id >= 0) tooltip.add("(Computer ID: " + id + ")");
+		}
+
+		if (hasCustomRom(stack)) {
+			int id = getCustomRom(stack);
+			if (advanced && id >= 0) {
+				tooltip.add("Has custom ROM (disk ID: " + id + ")");
+			} else {
+				tooltip.add("Has custom ROM");
+			}
+		}
+	}
 	
 	@Nonnull
 	@Override
@@ -123,8 +189,46 @@ public class ItemPocketComputer_Patch extends ItemPocketComputer implements ICom
 		return ComputerFamily.Normal;
 	}
 
+	@Override
+	public boolean hasCustomRom(@Nonnull ItemStack stack) {
+		return stack.hasTagCompound() && stack.getTagCompound().hasKey("rom_id", 99);
+	}
+
+	@Override
+	public int getCustomRom(@Nonnull ItemStack stack) {
+		return stack.getTagCompound().getInteger("rom_id");
+	}
+
+	@Override
+	public void clearCustomRom(@Nonnull ItemStack stack) {
+		if (stack.hasTagCompound()) {
+			NBTTagCompound tag = stack.getTagCompound();
+			tag.removeTag("rom_id");
+			tag.removeTag("instanceID");
+			tag.removeTag("sessionID");
+		}
+	}
+
+	@Override
+	public void setCustomRom(@Nonnull ItemStack stack, int id) {
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag == null) stack.setTagCompound(tag = new NBTTagCompound());
+
+		tag.setInteger("rom_id", id);
+		tag.removeTag("instanceID");
+		tag.removeTag("sessionID");
+	}
+
 	@MergeVisitor.Stub
-	private void setComputerID(ItemStack stack, int computerID) {
+	private void setComputerID(ItemStack stack, int id) {
+	}
+
+	@MergeVisitor.Stub
+	private void setInstanceID(ItemStack stack, int id) {
+	}
+
+	@MergeVisitor.Stub
+	private void setSessionID(ItemStack stack, int id) {
 	}
 
 	@MergeVisitor.Stub
@@ -133,7 +237,25 @@ public class ItemPocketComputer_Patch extends ItemPocketComputer implements ICom
 	}
 
 	@MergeVisitor.Stub
-	private ServerComputer createServerComputer(World world, IInventory inventory, ItemStack stack) {
-		throw new RuntimeException("Not implemented");
+	public int getInstanceID(ItemStack stack) {
+		return -1;
+	}
+
+	@MergeVisitor.Stub
+	public int getSessionID(ItemStack stack) {
+		return -1;
+	}
+
+	@Override
+	public int getOriginalColor(ItemStack stack) {
+		return stack.getTagCompound().getInteger("original_color");
+	}
+
+	@Override
+	public void setOriginalColor(ItemStack stack,int hex) {
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag == null) stack.setTagCompound(tag = new NBTTagCompound());
+
+		tag.setInteger("original_color", hex);
 	}
 }

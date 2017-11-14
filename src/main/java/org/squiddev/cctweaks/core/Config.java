@@ -64,6 +64,23 @@ public final class Config {
 		 */
 		@DefaultBoolean(true)
 		public static boolean debugWandEnabled;
+
+		/**
+		 * Config options about creating custom ROMs.
+		 */
+		public static class CustomRom {
+			/**
+			 * Whether custom ROMs are enabled.
+			 */
+			@DefaultBoolean(true)
+			public static boolean enabled;
+
+			/**
+			 * Whether crafting of custom ROMs is enabled.
+			 */
+			@DefaultBoolean(true)
+			public static boolean crafting;
+		}
 	}
 
 	/**

@@ -1,8 +1,13 @@
 package org.squiddev.cctweaks.core.asm;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.ModContainer;
-import net.minecraft.launchwrapper.IClassTransformer;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.apache.logging.log4j.Level;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.TraceClassVisitor;
@@ -10,14 +15,16 @@ import org.squiddev.cctweaks.core.Config;
 import org.squiddev.cctweaks.core.utils.DebugLogger;
 import org.squiddev.cctweaks.integration.multipart.MultipartIntegration;
 import org.squiddev.cctweaks.lua.asm.CustomChain;
-import org.squiddev.cctweaks.lua.asm.Tweaks;
+import org.squiddev.cctweaks.lua.asm.NewTweaks;
 import org.squiddev.patcher.Logger;
 import org.squiddev.patcher.transformer.ClassMerger;
 import org.squiddev.patcher.transformer.ClassReplacer;
 import org.squiddev.patcher.transformer.IPatcher;
 import org.squiddev.patcher.transformer.ISource;
 
-import java.io.*;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ModContainer;
+import net.minecraft.launchwrapper.IClassTransformer;
 
 public class ASMTransformer implements IClassTransformer {
 	private final CustomChain patches = new CustomChain();
@@ -35,9 +42,13 @@ public class ASMTransformer implements IClassTransformer {
 			This probably includes *_Rewrite as well as many of the binary handlers as they only exist
 			because they need to stub classes that we patch anyway.
 		 */
-		Tweaks.setup(patches);
+		NewTweaks.setup(patches);
 
 		add(new Object[]{
+			new ClassMerger(
+				"dan200.computercraft.core.computer.Computer",
+				"org.squiddev.cctweaks.core.patch.Computer_Patch"
+			),
 			// General stuff
 			new ClassReplacer(
 				"dan200.computercraft.shared.turtle.core.TurtleRefuelCommand",
@@ -111,7 +122,6 @@ public class ASMTransformer implements IClassTransformer {
 			),
 			
 			// Pocket upgrades
-			new PocketUpgrades(),
 			new ClassMerger(
 				"dan200.computercraft.shared.pocket.items.ItemPocketComputer",
 				"org.squiddev.cctweaks.core.patch.ItemPocketComputer_Patch"
@@ -140,6 +150,21 @@ public class ASMTransformer implements IClassTransformer {
 			),
 			
 			new TurtlePermissions(),
+
+			// Custom ROM booting
+			new SetCustomRom(),
+			new ClassMerger(
+					"dan200.computercraft.shared.computer.blocks.TileComputerBase",
+					"org.squiddev.cctweaks.core.patch.TileComputerBase_Patch"
+				),
+			new ClassMerger(
+				"dan200.computercraft.shared.computer.items.ComputerItemFactory",
+				"org.squiddev.cctweaks.core.patch.ComputerItemFactory_Patch"
+			),
+			new ClassMerger(
+				"dan200.computercraft.shared.turtle.items.TurtleItemFactory",
+				"org.squiddev.cctweaks.core.patch.TurtleItemFactory_Patch"
+			),
 		});
 
 		patches.finalise();

@@ -7,20 +7,32 @@ import dan200.computercraft.shared.computer.items.ItemComputerBase;
 import dan200.computercraft.shared.turtle.items.ItemTurtleBase;
 import dan200.computercraft.shared.turtle.items.TurtleItemFactory;
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
+
 import org.squiddev.cctweaks.api.IComputerItemFactory;
+import org.squiddev.cctweaks.api.computer.ICustomRomItem;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
- * Implements {@link IComputerItemFactory} on this.
+ * Implements {@link IComputerItemFactory} and {@link ICustomRomItem}.
  */
-public abstract class ItemComputerBase_Patch extends ItemComputerBase implements IComputerItemFactory {
+@MergeVisitor.Rename(
+	from = "org/squiddev/cctweaks/core/patch/TileComputerBase_Patch",
+	to = "dan200/computercraft/shared/computer/blocks/TileComputerBase"
+)
+public abstract class ItemComputerBase_Patch extends ItemComputerBase implements IComputerItemFactory, ICustomRomItem {
 	@MergeVisitor.Stub
 	protected ItemComputerBase_Patch() {
 		super(null);
@@ -68,5 +80,84 @@ public abstract class ItemComputerBase_Patch extends ItemComputerBase implements
 		} else {
 			return ComputerFamily.Normal;
 		}
+	}
+
+	@Override
+	public boolean hasCustomRom(@Nonnull ItemStack stack) {
+		return stack.hasTagCompound() && stack.getTagCompound().hasKey("rom_id", 99);
+	}
+
+	@Override
+	public void clearCustomRom(@Nonnull ItemStack stack) {
+		if (stack.hasTagCompound()) {
+			stack.getTagCompound().removeTag("rom_id");
+		}
+	}
+
+	@Override
+	public void setCustomRom(@Nonnull ItemStack stack, int id) {
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag == null) stack.setTagCompound(tag = new NBTTagCompound());
+		tag.setInteger("rom_id", id);
+	}
+
+	@Override
+	public int getCustomRom(@Nonnull ItemStack stack) {
+		return stack.getTagCompound().getInteger("rom_id");
+	}
+
+	@Override
+	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x,int y,int z, int side, float hitX, float hitY, float hitZ, int meta) {
+		if (!super.placeBlockAt(stack, player, world, x,y,z, side, hitX, hitY, hitZ, meta)) return false;
+
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag != null && tag.hasKey("rom_id", 99)) {
+			TileEntity tile = world.getTileEntity(x,y,z);
+			if (tile != null && tile instanceof TileComputerBase_Patch) {
+				TileComputerBase_Patch computer = (TileComputerBase_Patch) tile;
+				computer.hasDisk = true;
+				computer.diskId = tag.getInteger("rom_id");
+			}
+		}
+		if (tag != null && tag.hasKey("original_color", 99)) {
+			TileEntity tile = world.getTileEntity(x,y,z);
+			if (tile != null && tile instanceof TileComputerBase_Patch) {
+				TileComputerBase_Patch computer = (TileComputerBase_Patch) tile;
+				computer.hasColor = true;
+				computer.originalColor = tag.getInteger("original_color");
+			}
+		}
+
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced) {
+		if (advanced) {
+			int id = getComputerID(stack);
+			if (id >= 0) tooltip.add("(Computer ID: " + id + ")");
+		}
+
+		if (hasCustomRom(stack)) {
+			int id = getCustomRom(stack);
+			if (advanced && id >= 0) {
+				tooltip.add("Has custom ROM (disk ID: " + id + ")");
+			} else {
+				tooltip.add("Has custom ROM");
+			}
+		}
+	}
+
+	@Override
+	public int getOriginalColor(ItemStack stack) {
+		return stack.getTagCompound().getInteger("original_color");
+	}
+
+	@Override
+	public void setOriginalColor(ItemStack stack,int hex) {
+		NBTTagCompound tag = stack.getTagCompound();
+		if (tag == null) stack.setTagCompound(tag = new NBTTagCompound());
+		tag.setInteger("original_color", hex);
 	}
 }

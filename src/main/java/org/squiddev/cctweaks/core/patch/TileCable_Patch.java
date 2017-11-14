@@ -25,7 +25,6 @@ import org.squiddev.cctweaks.core.utils.DebugLogger;
 import org.squiddev.cctweaks.core.utils.Helpers;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
-@MergeVisitor.Rename(from = "dan200/computercraft/shared/peripheral/modem/TileCable$Packet", to = "org/squiddev/cctweaks/api/network/Packet")
 public class TileCable_Patch extends TileCable implements IWorldNetworkNodeHost, IWorldPosition {
 	public static final double MIN = 0.375;
 	public static final double MAX = 1 - MIN;

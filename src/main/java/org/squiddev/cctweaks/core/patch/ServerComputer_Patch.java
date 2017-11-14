@@ -1,15 +1,18 @@
 package org.squiddev.cctweaks.core.patch;
 
+import java.io.File;
 import java.util.List;
 
 import org.squiddev.cctweaks.api.IContainerComputer;
+import org.squiddev.cctweaks.api.computer.IExtendedServerComputer;
 import org.squiddev.cctweaks.core.Config;
+import org.squiddev.cctweaks.lua.lib.ReadOnlyFileMount;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import dan200.computercraft.ComputerCraft;
-import dan200.computercraft.core.computer.Computer;
+import dan200.computercraft.api.filesystem.IMount;
 import dan200.computercraft.core.terminal.Terminal;
 import dan200.computercraft.shared.computer.core.ServerComputer;
 import dan200.computercraft.shared.network.ComputerCraftPacket;
@@ -27,14 +30,12 @@ import net.minecraft.world.World;
 
 /**
  * - Adds {@link IComputerEnvironmentExtended} and suspending events on timeout
- * - Adds isMostlyOn for detecting when a computer is on or starting up -
- * Various network changes
+ * - Various network changes
  */
-@MergeVisitor.Rename(from = { "org/squiddev/cctweaks/lua/patch/Computer_Patch",
-		"org/squiddev/cctweaks/lua/patch/ComputerThread_Rewrite",
-		"org/squiddev/cctweaks/core/patch/Terminal_Patch", }, to = { "dan200/computercraft/core/computer/Computer",
-				"dan200/computercraft/core/computer/ComputerThread", "dan200/computercraft/core/terminal/Terminal", })
-public class ServerComputer_Patch extends ServerComputer {
+@MergeVisitor.Rename(from = { "org/squiddev/cctweaks/core/patch/Computer_Patch", 
+		"org/squiddev/cctweaks/core/patch/Terminal_Patch", }, to = { "dan200/computercraft/core/computer/Computer", 
+		"dan200/computercraft/core/terminal/Terminal", })
+public class ServerComputer_Patch extends ServerComputer implements IExtendedServerComputer {
 	@MergeVisitor.Stub
 	private int m_ticksSincePing = 0;
 
@@ -45,7 +46,7 @@ public class ServerComputer_Patch extends ServerComputer {
 	private ChunkCoordinates m_position;
 
 	@MergeVisitor.Stub
-	private Computer m_computer;
+	private final Computer_Patch m_computer;
 
 	@MergeVisitor.Stub
 	private NBTTagCompound m_userData;
@@ -53,6 +54,15 @@ public class ServerComputer_Patch extends ServerComputer {
 	@MergeVisitor.Stub
 	public ServerComputer_Patch() {
 		super(null, -1, null, -1, null, -1, -1);
+		m_computer = null;
+	}
+
+	@Override
+	public void setCustomRom(int diskID) {
+		if (diskID < 0 || !Config.Computer.CustomRom.enabled) return;
+
+		IMount mount = new ReadOnlyFileMount(new File(ComputerCraft.getWorldDir(getWorld()), "computer/disk/" + diskID));
+		m_computer.setRomMount("lua/prebios-string.lua", mount);
 	}
 
 	@Override

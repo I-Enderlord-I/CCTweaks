@@ -24,7 +24,7 @@ public abstract class ItemBase extends Item implements IModule {
 		this(itemName, 64);
 	}
 
-	public NBTTagCompound getTag(ItemStack stack) {
+	public static NBTTagCompound getTag(ItemStack stack) {
 		NBTTagCompound tag = stack.getTagCompound();
 		if (tag == null) stack.setTagCompound(tag = new NBTTagCompound());
 		return tag;

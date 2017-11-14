@@ -7,6 +7,7 @@ import org.squiddev.cctweaks.blocks.network.BlockNetworked;
 import org.squiddev.cctweaks.client.render.RenderNetworkOverlay;
 import org.squiddev.cctweaks.core.peripheral.PeripheralHostProvider;
 import org.squiddev.cctweaks.core.pocket.CraftingPocketUpgrade;
+import org.squiddev.cctweaks.core.rom.CraftingSetRom;
 import org.squiddev.cctweaks.core.turtle.DefaultTurtleProviders;
 import org.squiddev.cctweaks.core.visualiser.NetworkPlayerWatcher;
 import org.squiddev.cctweaks.integration.IndustrialCraftIntegration;
@@ -55,6 +56,9 @@ public final class Registry {
 
 		addModule(new MultipartIntegration());
 		addModule(new OpenPeripheralIntegration());
+		
+		// Custom ROM
+		addModule(new CraftingSetRom());
 
 		addModule(new PeripheralHostProvider());
 		addModule(new Module() {

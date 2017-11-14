@@ -2,15 +2,25 @@ package org.squiddev.cctweaks.core;
 
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import dan200.computercraft.shared.computer.core.IComputer;
 import dan200.computercraft.shared.computer.core.ServerComputer;
+import dan200.computercraft.shared.media.items.ItemDiskLegacy;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.oredict.RecipeSorter;
 
 import org.squiddev.cctweaks.CCTweaks;
 import org.squiddev.cctweaks.api.IContainerComputer;
+import org.squiddev.cctweaks.api.computer.ICustomRomItem;
+import org.squiddev.cctweaks.core.rom.CraftingSetRom;
 import org.squiddev.cctweaks.lua.lib.DelayedTasks;
 
 import java.util.LinkedList;
@@ -99,6 +109,32 @@ public final class FmlEvents {
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
 		if (eventArgs.modID.equals(CCTweaks.ID)) {
 			Config.sync();
+		}
+	}
+	
+	@SubscribeEvent
+	public void onItemCrafted(ItemCraftedEvent event){
+		if (!(event.craftMatrix instanceof InventoryCrafting) || !CraftingSetRom.INSTANCE.matches((InventoryCrafting)event.craftMatrix, event.player.worldObj))
+			return;
+		
+		ItemStack romStack = null;
+		ItemStack diskStack = null;
+		int slot = 0;
+
+		for (int i = 0; i < event.craftMatrix.getSizeInventory(); i++) {
+			ItemStack stack = event.craftMatrix.getStackInSlot(i);
+			if (stack == null) continue;
+			Item item = stack.getItem();
+			if (item instanceof ItemDiskLegacy) {
+				diskStack = stack;
+			} else if (item instanceof ICustomRomItem) {
+				romStack = stack;
+				slot = i;
+			}
+		}
+		
+		if(((ICustomRomItem) romStack.getItem()).hasCustomRom(romStack)){
+			event.craftMatrix.setInventorySlotContents(slot, CraftingSetRom.createComputerContainer(romStack, diskStack));
 		}
 	}
 }
