@@ -1,5 +1,11 @@
 package org.squiddev.cctweaks.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.squiddev.cctweaks.api.IWorldPosition;
+import org.squiddev.cctweaks.core.utils.WorldPosition;
+
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.Entity;
@@ -7,11 +13,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import org.squiddev.cctweaks.api.IWorldPosition;
-import org.squiddev.cctweaks.core.utils.WorldPosition;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Main event handler
@@ -91,4 +92,6 @@ public class McEvents {
 			event.drops.clear();
 		}
 	}
+	
+	
 }
