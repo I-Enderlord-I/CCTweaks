@@ -138,6 +138,8 @@ public class ASMTransformer implements IClassTransformer {
 				"dan200.computercraft.shared.computer.core.ServerComputerRegistry",
 				"org.squiddev.cctweaks.core.patch.ServerComputerRegistry_Patch"
 			),
+			
+			new TurtlePermissions(),
 		});
 
 		patches.finalise();

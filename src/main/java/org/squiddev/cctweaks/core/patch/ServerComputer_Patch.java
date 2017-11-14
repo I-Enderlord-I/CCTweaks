@@ -89,7 +89,7 @@ public class ServerComputer_Patch extends ServerComputer {
 
 	public void broadcastState() {
 		ComputerCraftPacket packet = new ComputerCraftPacket();
-		packet.m_packetType = 7;
+		packet.m_packetType = ComputerCraftPacket.ComputerChanged;
 		packet.m_dataInt = new int[] { this.getInstanceID() };
 		packet.m_dataNBT = new NBTTagCompound();
 		writeDescription(packet.m_dataNBT);
@@ -128,7 +128,7 @@ public class ServerComputer_Patch extends ServerComputer {
 
 	private ComputerCraftPacket createStatePacket() {
 		ComputerCraftPacket packet = new ComputerCraftPacket();
-		packet.m_packetType = 7;
+		packet.m_packetType = ComputerCraftPacket.ComputerChanged;
 		packet.m_dataInt = new int[] { getInstanceID() };
 		packet.m_dataNBT = new NBTTagCompound();
 		return packet;
