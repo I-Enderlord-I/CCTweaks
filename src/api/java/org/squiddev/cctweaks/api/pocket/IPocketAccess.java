@@ -1,10 +1,13 @@
 package org.squiddev.cctweaks.api.pocket;
 
+import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * Wrapper class for pocket computers
@@ -15,6 +18,7 @@ public interface IPocketAccess {
 	 *
 	 * @return The holding entity, may be {@code null}.
 	 */
+	@Nullable
 	Entity getEntity();
 
 	/**
@@ -36,6 +40,7 @@ public interface IPocketAccess {
 	 *
 	 * @return The upgrade's NBT
 	 */
+	@Nonnull
 	NBTTagCompound getUpgradeNBTData();
 
 	/**
@@ -44,9 +49,16 @@ public interface IPocketAccess {
 	void updateUpgradeNBTData();
 
 	/**
+	 * Remove the current peripheral and create a new one. You
+	 * may wish to do this if the methods available change.
+	 */
+	void invalidatePeripheral();
+
+	/**
 	 * Get a list of all upgrades for the pocket computer
 	 *
 	 * @return A collection of all upgrade names
 	 */
-	Set<ResourceLocation> getUpgrades();
+	@Nonnull
+	Map<ResourceLocation, IPeripheral> getUpgrades();
 }

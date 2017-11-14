@@ -20,6 +20,7 @@ import org.squiddev.cctweaks.items.ItemDataCard;
 import org.squiddev.cctweaks.items.ItemDebugger;
 import org.squiddev.cctweaks.items.ItemToolHost;
 import org.squiddev.cctweaks.lua.lib.ApiRegister;
+import org.squiddev.cctweaks.pocket.PocketWirelessBridge;
 import org.squiddev.cctweaks.turtle.TurtleUpgradeWirelessBridge;
 
 import java.util.HashSet;
@@ -64,6 +65,7 @@ public final class Registry {
 		});
 
 		addModule(new DefaultTurtleProviders());
+		addModule(new PocketWirelessBridge());
 		addModule(new TurtleUpgradeWirelessBridge());
 		addModule(new RedstoneFluxIntegration());
 		addModule(new IndustrialCraftIntegration());
