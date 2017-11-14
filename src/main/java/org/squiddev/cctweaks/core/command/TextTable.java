@@ -92,6 +92,7 @@ public class TextTable {
 		for (int i = 0; i < header.length; i++) {
 			this.header[i] = ChatHelpers.header(header[i]);
 		}
+		this.columns = header.length;
 	}
 
 	public void addRow(@Nonnull IChatComponent... row) {
@@ -105,6 +106,8 @@ public class TextTable {
 	}
 
 	public void displayTo(ICommandSender sender) {
+		if (columns <= 0) return;
+		
 		final int maxWidth = getMaxWidth(sender);
 
 		int[] minWidths = new int[columns];
