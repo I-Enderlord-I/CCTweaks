@@ -1,13 +1,14 @@
 package org.squiddev.cctweaks.api.pocket;
 
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Map;
 
 /**
  * Wrapper class for pocket computers
