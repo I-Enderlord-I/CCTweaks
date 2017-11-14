@@ -31,16 +31,6 @@ public final class CommandCCTweaks {
 			"The CCTweaks command provides various debugging and administrator tools for controlling and interacting " +
 				"with computers."
 		);
-		
-		{
-			CommandRoot profile = new CommandRoot(
-				"profile", "Profile the CPU usage of computers.",
-				"Monitor all computers on the server and counts the time they ran for, along with number of yields and " +
-					"other useful information. This requires multi-threading to be enabled, though the thread count can be 1"
-			);
-
-			root.register(profile);
-		}
 
 		root.register(new SubCommandBase(
 			"shutdown", "[ids...]", "Shutdown computers remotely.",
@@ -124,7 +114,7 @@ public final class CommandCCTweaks {
 		root.register(new SubCommandGive());
 
 		root.register(new SubCommandBase(
-			"view", "View the terminal of a computer.",
+			"view", "<id>", "View the terminal of a computer.",
 			"Open the terminal of a computer, allowing remote control of a computer. This does not provide access to " +
 				"turtle's inventories. You can either specify the computer's instance id (e.g. 123) or computer id (e.g #123)."
 		) {
@@ -153,6 +143,14 @@ public final class CommandCCTweaks {
 	}
 
 	private static IChatComponent linkComputer(ServerComputer computer) {
+		return link(
+			text(Integer.toString(computer.getInstanceID())),
+			"/cctweaks dump " + computer.getInstanceID(),
+			"View more info about this computer"
+		);
+	}
+
+	private static IChatComponent linkPosition(ServerComputer computer) {
 		return link(
 			position(computer.getPosition().posX,computer.getPosition().posY,computer.getPosition().posZ),
 			"/cctweaks tp " + computer.getInstanceID(),
