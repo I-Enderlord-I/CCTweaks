@@ -85,3 +85,7 @@ gui.config.cctweaks.apis.socket.maxRead=Max read length
 gui.config.cctweaks.apis.data=Data
 gui.config.cctweaks.apis.data.enabled=Enabled
 gui.config.cctweaks.apis.data.limit=Limit
+
+gui.config.cctweaks.packets=ComputerCraft Packets
+gui.config.cctweaks.packets.updateLimiting=Limited updates
+gui.config.cctweaks.packets.terminalLimiting=Limited terminal updates
