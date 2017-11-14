@@ -3,11 +3,21 @@ package org.squiddev.cctweaks.core;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import dan200.computercraft.shared.computer.core.IComputer;
+import dan200.computercraft.shared.computer.core.ServerComputer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.server.MinecraftServer;
+
 import org.squiddev.cctweaks.CCTweaks;
+import org.squiddev.cctweaks.api.IContainerComputer;
 import org.squiddev.cctweaks.lua.lib.DelayedTasks;
 
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.WeakHashMap;
 
 /**
  * This handles various events
@@ -25,6 +35,7 @@ public final class FmlEvents {
 
 	private final Queue<Runnable> serverQueue = new LinkedList<Runnable>();
 	private final Queue<Runnable> clientQueue = new LinkedList<Runnable>();
+	private static final Map<EntityPlayerMP, Integer> oldContainer = new WeakHashMap<EntityPlayerMP, Integer>();
 
 	public static void schedule(Runnable runnable) {
 		synchronized (instance.serverQueue) {
@@ -46,6 +57,27 @@ public final class FmlEvents {
 				Runnable scheduled;
 				while ((scheduled = serverQueue.poll()) != null) {
 					scheduled.run();
+				}
+			}
+		} else if (event.phase == TickEvent.Phase.END) {
+			// Track container changes and send it when a new container is opened.
+
+			for (EntityPlayerMP player : (List<EntityPlayerMP>)MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+				Container container = player.openContainer;
+				if (container == null) {
+					oldContainer.remove(player);
+				} else {
+					Integer oldIndexObj = oldContainer.get(player);
+
+					if (oldIndexObj == null || oldIndexObj != container.windowId) {
+						oldContainer.put(player, container.windowId);
+						if (container instanceof IContainerComputer) {
+							IComputer computer = ((IContainerComputer) container).getComputer();
+							if (computer instanceof ServerComputer) {
+								((ServerComputer) computer).sendState(player);
+							}
+						}
+					}
 				}
 			}
 		}

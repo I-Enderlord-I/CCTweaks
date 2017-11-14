@@ -217,6 +217,17 @@ public final class Config {
 	}
 
 	/**
+	 * Controls over the packets sent between the server and client.
+	 */
+	public static final class Packets {
+		/**
+		 * Only broadcast computer state to those in the current dimension and in range or to those interacting with it.
+		 */
+		@DefaultBoolean(true)
+		public static boolean updateLimiting;
+	}
+
+	/**
 	 * Integration with other mods.
 	 */
 	@RequiresRestart
