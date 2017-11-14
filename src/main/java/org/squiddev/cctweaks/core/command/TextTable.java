@@ -42,7 +42,7 @@ public class TextTable {
 	private static final IChatComponent SEPARATOR = coloured(" | ", EnumChatFormatting.GRAY);
 	private static final IChatComponent LINE = text("\n");
 
-	public static int getWidth(char character, ICommandSender sender) {
+	private static int getWidth(char character, ICommandSender sender) {
 		if (sender instanceof EntityPlayerMP && !(sender instanceof FakePlayer)) {
 			// Use font widths here.
 			if (character == 167) {
@@ -60,7 +60,7 @@ public class TextTable {
 		}
 	}
 
-	public static int getWidth(IChatComponent text, ICommandSender sender) {
+	private static int getWidth(IChatComponent text, ICommandSender sender) {
 		int sum = 0;
 		String chars = text.getUnformattedTextForChat();
 		for (int i = 0; i < chars.length(); i++) {
@@ -176,7 +176,7 @@ public class TextTable {
 			delta = -delta;
 
 			// We have to remove some padding as there is a padding added between formatted and unformatted text
-			if (!entry.getChatStyle().isEmpty()) delta -= 1;
+			if (!entry.getChatStyle().isEmpty() && sender instanceof EntityPlayerMP && !(sender instanceof FakePlayer)) delta -= 1;
 
 			out.appendSibling(entry);
 
@@ -194,7 +194,7 @@ public class TextTable {
 			}
 
 			out.appendSibling(component);
-		} else if (delta < 0) {
+		} else if (delta > 0) {
 			out.appendSibling(entry);
 		} else {
 			out.appendSibling(entry);
