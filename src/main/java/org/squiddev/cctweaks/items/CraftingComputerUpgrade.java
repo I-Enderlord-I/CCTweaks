@@ -1,5 +1,7 @@
 package org.squiddev.cctweaks.items;
 
+import org.squiddev.cctweaks.core.rom.CraftingSetRom;
+
 import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.shared.computer.core.ComputerFamily;
 import dan200.computercraft.shared.computer.items.ComputerItemFactory;
@@ -38,12 +40,13 @@ public class CraftingComputerUpgrade implements IRecipe {
 		int id = computerItem.getComputerID(computerStack);
 		String label = computerItem.getLabel(computerStack);
 
+		ItemStack stack;
 		if (computerItem instanceof ItemComputer) {
-			return ComputerItemFactory.create(id, label, ComputerFamily.Advanced);
+			stack = ComputerItemFactory.create(id, label, ComputerFamily.Advanced);
 		} else if (computerItem instanceof ItemTurtleBase) {
 			ItemTurtleBase turtle = (ItemTurtleBase) computerItem;
 
-			return TurtleItemFactory.create(
+			stack = TurtleItemFactory.create(
 				id, label, turtle.getColour(computerStack), ComputerFamily.Advanced,
 				turtle.getUpgrade(computerStack, TurtleSide.Left),
 				turtle.getUpgrade(computerStack, TurtleSide.Right),
@@ -52,19 +55,19 @@ public class CraftingComputerUpgrade implements IRecipe {
 		} else if (computerItem instanceof ItemPocketComputer) {
 			ItemPocketComputer pocket = (ItemPocketComputer) computerItem;
 
-			ItemStack stack = PocketComputerItemFactory.create(id, label, ComputerFamily.Advanced, pocket.getHasModem(computerStack));
+			stack = PocketComputerItemFactory.create(id, label, ComputerFamily.Advanced, pocket.getHasModem(computerStack));
 
-			NBTTagCompound toTag = stack.getTagCompound();
-			NBTTagCompound fromTag = computerStack.getTagCompound();
+			NBTTagCompound toTag = ItemBase.getTag(stack);
+			NBTTagCompound fromTag = ItemBase.getTag(computerStack);
 
 			if (fromTag.hasKey("upgrade")) toTag.setTag("upgrade", fromTag.getTag("upgrade"));
 			if (fromTag.hasKey("upgrade_name")) toTag.setTag("upgrade_name", fromTag.getTag("upgrade_name"));
 			if (fromTag.hasKey("upgrade_info")) toTag.setTag("upgrade_info", fromTag.getTag("upgrade_info"));
-
-			return stack;
 		} else {
 			return null;
 		}
+		
+		return CraftingSetRom.copyRom(stack, computerStack); 
 	}
 
 	/**

@@ -1,10 +1,8 @@
 package org.squiddev.cctweaks.core.rom;
 
 import dan200.computercraft.ComputerCraft;
-import dan200.computercraft.ComputerCraft.Blocks;
 import dan200.computercraft.shared.computer.core.ComputerFamily;
 import dan200.computercraft.shared.computer.items.ComputerItemFactory;
-import dan200.computercraft.shared.computer.items.ItemComputer;
 import dan200.computercraft.shared.media.items.ItemDiskExpanded;
 import dan200.computercraft.shared.media.items.ItemDiskLegacy;
 import dan200.computercraft.shared.util.Colour;
@@ -123,6 +121,19 @@ public class CraftingSetRom extends Module implements IRecipe {
 
 	private static ItemStack newDisk(ItemStack romStack) {
 		return ItemDiskExpanded.createFromIDAndColour(((ICustomRomItem)romStack.getItem()).getCustomRom(romStack), null, ((ICustomRomItem)romStack.getItem()).getOriginalColor(romStack));
+	}
+
+	public static ItemStack copyRom(ItemStack to, ItemStack from) {
+		NBTTagCompound fromTag = from.getTagCompound();
+		if (fromTag != null) {
+			NBTTagCompound toTag = to.getTagCompound();
+			if (toTag == null) to.setTagCompound(toTag = new NBTTagCompound());
+
+			if (fromTag.hasKey("rom_id")) toTag.setTag("rom_id", fromTag.getTag("rom_id"));
+			if (fromTag.hasKey("original_color")) toTag.setTag("original_color", fromTag.getTag("original_color"));
+		}
+
+		return to;
 	}
 	
 	public static ItemStack createComputerContainer(ItemStack stack, ItemStack newROM){
