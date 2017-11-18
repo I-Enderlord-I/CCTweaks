@@ -82,7 +82,7 @@ public final class Registry {
 		addModule(new CraftingPocketUpgrade()); 
 	}
 
-	public static void addModule(IModule module) {
+	private static void addModule(IModule module) {
 		if (module instanceof IClientModule) {
 			module = new RegisterWrapperClient((IClientModule) module);
 		}

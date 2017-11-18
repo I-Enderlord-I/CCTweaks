@@ -32,9 +32,16 @@ import net.minecraft.world.World;
  * - Adds {@link IComputerEnvironmentExtended} and suspending events on timeout
  * - Various network changes
  */
-@MergeVisitor.Rename(from = { "org/squiddev/cctweaks/core/patch/Computer_Patch", 
-		"org/squiddev/cctweaks/core/patch/Terminal_Patch", }, to = { "dan200/computercraft/core/computer/Computer", 
-		"dan200/computercraft/core/terminal/Terminal", })
+@MergeVisitor.Rename(
+	from = {
+		"org/squiddev/cctweaks/core/patch/Computer_Patch", 
+		"org/squiddev/cctweaks/core/patch/Terminal_Patch"
+	},
+	to = {
+		"dan200/computercraft/core/computer/Computer", 
+		"dan200/computercraft/core/terminal/Terminal"
+	}
+)
 public class ServerComputer_Patch extends ServerComputer implements IExtendedServerComputer {
 	@MergeVisitor.Stub
 	private int m_ticksSincePing = 0;
