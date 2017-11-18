@@ -6,6 +6,8 @@ import dan200.computercraft.api.turtle.ITurtleUpgrade;
 import dan200.computercraft.api.turtle.TurtleSide;
 import dan200.computercraft.shared.turtle.blocks.ITurtleTile;
 import dan200.computercraft.shared.util.InventoryUtil;
+import dan200.computercraft.shared.util.WorldUtil;
+import ic2.api.Direction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.item.ItemStack;
@@ -17,6 +19,9 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.IFluidBlock;
+
+import javax.annotation.Nonnull;
+
 import org.squiddev.cctweaks.api.CCTweaksAPI;
 import org.squiddev.cctweaks.api.network.INetworkNodeProvider;
 import org.squiddev.cctweaks.api.network.IWorldNetworkNode;
@@ -40,15 +45,21 @@ public class DefaultTurtleProviders extends Module {
 			}
 
 			@Override
-			public int refuel(ITurtleAccess turtle, ItemStack stack, int limit) {
+			public int refuel(@Nonnull ITurtleAccess turtle, @Nonnull ItemStack stack, int limit) {
+				if (limit > stack.stackSize) limit = stack.stackSize;
+
 				int fuelToGive = TileEntityFurnace.getItemBurnTime(stack) * 5 / 100 * limit;
 				ItemStack replacementStack = stack.getItem().getContainerItem(stack);
 
 				// Remove 'n' items from the stack.
-				InventoryUtil.takeItems(limit, turtle.getInventory(), 0, turtle.getInventory().getSizeInventory(), turtle.getSelectedSlot());
+				int slot = turtle.getSelectedSlot();
+				InventoryUtil.takeItems(limit, turtle.getInventory(), slot, 1, slot);
 				if (replacementStack != null) {
 					// If item is empty (bucket) then add it back
-					InventoryUtil.storeItems(replacementStack, turtle.getInventory(), 0, turtle.getInventory().getSizeInventory(), turtle.getSelectedSlot());
+					replacementStack = InventoryUtil.storeItems(replacementStack, turtle.getInventory(), 0, turtle.getInventory().getSizeInventory(), slot);
+					if (replacementStack != null) {
+						WorldUtil.dropItemStack(replacementStack, turtle.getWorld(), turtle.getPosition().posX, turtle.getPosition().posY, turtle.getPosition().posZ, Direction.fromSideValue(turtle.getDirection()).getInverse().toSideValue());
+					}
 				}
 
 				return fuelToGive;
